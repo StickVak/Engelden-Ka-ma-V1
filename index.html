@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dodge Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --background-color: #2c3e50;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--background-color);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+        }
+
+        .screen {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        #gameArea {
+            width: 600px;
+            height: 400px;
+            background: rgba(0, 0, 0, 0.8);
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+
+        #player {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-color);
+            position: absolute;
+            bottom: 20px;
+            left: 280px;
+            border-radius: 5px;
+            transition: transform 0.3s;
+        }
+
+        .obstacle {
+            width: 30px;
+            height: 30px;
+            background: var(--danger-color);
+            position: absolute;
+            top: -30px;
+            border-radius: 5px;
+        }
+
+        .powerup {
+            width: 25px;
+            height: 25px;
+            background: var(--secondary-color);
+            position: absolute;
+            top: -25px;
+            border-radius: 50%;
+            animation: glow 1s infinite alternate;
+        }
+
+        .game-container {
+            position: relative;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .mobile-controls {
+            display: none;
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-controls {
+                display: flex;
+            }
+        }
+
+        .control-btn {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+        }
+
+        #lives {
+            color: var(--danger-color);
+            font-size: 24px;
+        }
+
+        .settings-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .settings-form label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .settings-form input[type="text"],
+        .settings-form select {
+            padding: 8px;
+            border-radius: 5px;
+            border: none;
+            width: 200px;
+        }
+
+        .settings-form input[type="range"] {
+            width: 200px;
+        }
+
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px var(--secondary-color);
+            }
+            to {
+                box-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px var(--secondary-color);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Main Menu -->
+        <div id="mainMenu" class="screen">
+            <h1>Dodge Game</h1>
+            <button id="playButton">Oyna</button>
+            <button id="settingsButton">Ayarlar</button>
+            <button id="tutorialButton">Nasıl Oynanır</button>
+            <button id="leaderboardButton">Lider Tablosu</button>
+        </div>
+
+        <!-- Settings Menu -->
+        <div id="settingsMenu" class="screen hidden">
+            <h2>Ayarlar</h2>
+            <div class="settings-form">
+                <div>
+                    <label for="playerName">Oyuncu Adı:</label>
+                    <input type="text" id="playerName">
+                </div>
+                <div>
+                    <label for="difficultySelect">Zorluk:</label>
+                    <select id="difficultySelect">
+                        <option value="easy">Kolay</option>
+                        <option value="normal">Normal</option>
+                        <option value="hard">Zor</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Kontroller:</label>
+                    <div>
+                        <input type="radio" name="controls" value="arrows" id="arrowControls" checked>
+                        <label for="arrowControls">Ok Tuşları</label>
+                        <input type="radio" name="controls" value="touch" id="touchControls">
+                        <label for="touchControls">Dokunmatik</label>
+                    </div>
+                </div>
+                <div>
+                    <label for="musicVolume">Müzik Sesi:</label>
+                    <input type="range" id="musicVolume" min="0" max="100">
+                </div>
+                <div>
+                    <label for="sfxVolume">Efekt Sesi:</label>
+                    <input type="range" id="sfxVolume" min="0" max="100">
+                </div>
+                <div>
+                    <input type="checkbox" id="particleEffects" checked>
+                    <label for="particleEffects">Parçacık Efektleri</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="screenShake" checked>
+                    <label for="screenShake">Ekran Sarsıntısı</label>
+                </div>
+                <button id="saveSettings">Kaydet</button>
+                <button id="backFromSettings">Geri</button>
+            </div>
+        </div>
+
+        <!-- Tutorial Screen -->
+        <div id="tutorialScreen" class="screen hidden">
+            <h2>Nasıl Oynanır</h2>
+            <p>Ok tuşlarını kullanarak engellerden kaçın ve güç-upları toplayın!</p>
+            <p>Güç-uplar:</p>
+            <ul>
+                <li>🛡️ Kalkan - Geçici koruma sağlar</li>
+                <li>⏰ Yavaşlatma - Zamanı yavaşlatır</li>
+                <li>❤️ Ekstra Can - Can kazandırır</li>
+                <li>🧲 Mıknatıs - Güç-upları çeker</li>
+                <li>📏 Küçülme - Karakteri küçültür</li>
+                <li>🎯 Çift Atış - Engelleri vurabilirsiniz</li>
+            </ul>
+            <button id="backFromTutorial">Geri</button>
+        </div>
+
+        <!-- Leaderboard Screen -->
+        <div id="leaderboardScreen" class="screen hidden">
+            <h2>Lider Tablosu</h2>
+            <table id="leaderboardTable">
+                <thead>
+                    <tr>
+                        <th>Sıra</th>
+                        <th>İsim</th>
+                        <th>Skor</th>
+                        <th>Tarih</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <button id="backFromLeaderboard">Geri</button>
+        </div>
+
+        <!-- Game Container -->
+        <div id="gameContainer" class="screen hidden">
+            <div class="game-container">
+                <div id="gameArea">
+                    <div id="player"></div>
+                    <div class="mobile-controls">
+                        <div id="leftBtn" class="control-btn">◀</div>
+                        <div id="rightBtn" class="control-btn">▶</div>
+                    </div>
+                </div>
+                <div class="controls">
+                    <div>
+                        <span>Skor: <span id="scoreValue">0</span></span>
+                        <span>En Yüksek: <span id="highScoreValue">0</span></span>
+                        <span>Seviye: <span id="levelValue">1</span></span>
+                    </div>
+                    <div id="lives"></div>
+                    <div>
+                        <button id="muteButton"><i class="fas fa-volume-up"></i></button>
+                        <button id="pauseButton"><i class="fas fa-pause"></i></button>
+                        <button id="menuButton"><i class="fas fa-home"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="gameOver" class="screen hidden">
+            <h2>Oyun Bitti!</h2>
+            <p>Skor: <span id="finalScore">0</span></p>
+            <p>En Yüksek Skor: <span id="finalHighScore">0</span></p>
+            <button id="restartButton">Tekrar Oyna</button>
+            <button id="backToMenuButton">Ana Menü</button>
+        </div>
+    </div>
+
+    <!-- Audio Elements -->
+    <audio id="backgroundMusic" loop>
+        <source src="https://assets.mixkit.co/music/preview/mixkit-game-level-music-689.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="menuMusic" loop>
+        <source src="https://assets.mixkit.co/music/preview/mixkit-game-level-music-689.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="collisionSound">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-retro-game-over-213.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="powerupSound">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-game-ball-tap-2073.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="buttonClick">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-modern-click-box-check-1120.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="game.js"></script>
+</body>
+</html> 
