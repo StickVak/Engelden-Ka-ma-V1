@@ -1,0 +1,17 @@
+{
+  "name": "dodge-game",
+  "version": "1.0.0",
+  "description": "A modern dodge game with power-ups and achievements",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  },
+  "keywords": ["game", "dodge", "javascript", "html5"],
+  "author": "Dodge Game Developer",
+  "license": "MIT"
+}
